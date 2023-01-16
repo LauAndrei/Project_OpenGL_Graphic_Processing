@@ -459,40 +459,7 @@ void initSkyBox() {
 }
 
 void drawObjects(gps::Shader shader, bool depthPass) {
-	// select active shader program
-	//shader.useShaderProgram();
-
-	//GLint modelLoc = glGetUniformLocation(shader.shaderProgram, "model");
-	//model = glm::rotate(glm::mat4(1.0f), glm::radians(angleY), glm::vec3(0.0f, 1.0f, 0.0f));
-	//glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-
-	//// do not send the normal matrix if we are rendering in the depth map
-	//if (!depthPass) {
-	//	normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
-	//	glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-	//}
-
-	////send teapot model matrix data to shader
-	//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-	////send teapot normal matrix data to shader
-	//glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-
-	//// draw teapot
-	////teapot.Draw(shader);
-	//scene.Draw(shader);
-
-	//rotateCeilingFan(modelLoc);
-	//ceilingFan.Draw(shader);
 	shader.useShaderProgram();
-
-	//send scena model matrix data to shader
-	//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-	//send scena normal matrix data to shader
-	//glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-
-	//model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
 	model = glm::mat4(1.0f);
 	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
