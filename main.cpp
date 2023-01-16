@@ -570,8 +570,8 @@ glm::mat4 computeLightSpaceTrMatrix() {
 	//TODO - Return the light-space transformation matrix
 	glm::mat4 lightView = glm::lookAt(glm::mat3(lightRotation) * lightDir, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
-	const GLfloat near_plane = 0.1f, far_plane = 5.0f;
-	glm::mat4 lightProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, near_plane, far_plane);
+	const GLfloat near_plane = 0.1f, far_plane = 50.0f;
+	glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
 	glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 	return lightSpaceMatrix;
 }
@@ -608,8 +608,12 @@ void renderScene() {
 	view = myCamera.getViewMatrix();
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glCheckError();
+
+	lightDir = glm::vec3(10.0f, 20.0f, 10.0f);
 	lightRotation = glm::rotate(glm::mat4(1.0f), glm::radians(lightAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+	lightDirLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightDir");
 	glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::inverseTranspose(glm::mat3(view * lightRotation)) * lightDir));
+
 	glCheckError();
 	//bind the shadow map
 	glActiveTexture(GL_TEXTURE3);

@@ -27,23 +27,6 @@ namespace gps {
 
 	//update the camera internal parameters following a camera move event
 	void Camera::move(MOVE_DIRECTION direction, float speed) {
-		/*if (direction == MOVE_FORWARD) {
-			this->cameraPosition = cameraPosition + cameraFrontDirection * speed;
-			this->cameraRightDirection = glm::normalize(glm::cross(this->cameraFrontDirection, this->cameraUpDirection));
-		}
-		else if (direction == MOVE_BACKWARD) {
-			this->cameraPosition = cameraPosition - cameraFrontDirection * speed;
-			this->cameraRightDirection = glm::normalize(glm::cross(this->cameraFrontDirection, this->cameraUpDirection));
-		}
-		else if (direction == MOVE_LEFT) {
-			this->cameraRightDirection = glm::normalize(glm::cross(this->cameraFrontDirection, this->cameraUpDirection));
-			this->cameraPosition = cameraPosition - cameraRightDirection * speed;
-		}
-		else if (direction == MOVE_RIGHT) {
-			this->cameraRightDirection = glm::normalize(glm::cross(this->cameraFrontDirection, this->cameraUpDirection));
-			this->cameraPosition = cameraPosition + cameraRightDirection * speed;
-		}*/
-
 		switch (direction)
 		{
 		case MOVE_FORWARD:
@@ -93,12 +76,6 @@ namespace gps {
 	float actualPitch = 0.0f;
 	float actualYaw = 0.0f;
 	void Camera::rotate(float pitch, float yaw) {
-		/*glm::vec3 viewDirection;
-		viewDirection.x = cos(glm::radians(pitch)) * cos(glm::radians(yaw));
-		viewDirection.y = sin(glm::radians(pitch));
-		viewDirection.z = cos(glm::radians(pitch)) * sin(glm::radians(yaw));
-		this->cameraFrontDirection = glm::normalize(viewDirection);*/
-
 		actualPitch += pitch;
 		actualYaw += yaw;
 		if (actualPitch > 89.0f) {
