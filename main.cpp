@@ -52,6 +52,8 @@ GLint normalMatrixLoc;
 GLint lightDirLoc;
 GLfloat lightAngle;
 GLfloat angleY = 0.0f;
+GLfloat fogDensity = 0.00f;
+GLuint fogDensityLoc;
 
 // camera
 gps::Camera myCamera(
@@ -138,6 +140,9 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
+	if (key == GLFW_KEY_M && action == GLFW_PRESS)
+		showDepthMap = !showDepthMap;
+
 	if (key >= 0 && key < 1024) {
 		if (action == GLFW_PRESS) {
 			pressedKeys[key] = true;
@@ -194,6 +199,7 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 
 void processMovement() {
 	if (pressedKeys[GLFW_KEY_W]) {
+		glCheckError();
 		myCamera.move(gps::MOVE_FORWARD, cameraSpeed);
 		//update view matrix
 		view = myCamera.getViewMatrix();
@@ -201,9 +207,11 @@ void processMovement() {
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		// compute normal matrix for teapot
 		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		glCheckError();
 	}
 
 	if (pressedKeys[GLFW_KEY_S]) {
+		glCheckError();
 		myCamera.move(gps::MOVE_BACKWARD, cameraSpeed);
 		//update view matrix
 		view = myCamera.getViewMatrix();
@@ -211,6 +219,7 @@ void processMovement() {
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 		// compute normal matrix for teapot
 		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+		glCheckError();
 	}
 
 	if (pressedKeys[GLFW_KEY_A]) {
@@ -289,6 +298,22 @@ void processMovement() {
 		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 	}
 
+	if (pressedKeys[GLFW_KEY_1]) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+
+	if (pressedKeys[GLFW_KEY_2]) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+	}
+
+	if (pressedKeys[GLFW_KEY_3]) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+
+	/*if (pressedKeys[GLFW_KEY_4]) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POLYGON_MODE);
+	}*/
+
 	if (pressedKeys[GLFW_KEY_J]) {
 		myBasicShader.useShaderProgram();
 
@@ -307,6 +332,26 @@ void processMovement() {
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 		glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	}
+
+	if (pressedKeys[GLFW_KEY_0]) {
+		fogDensity = 0.0f;
+		glUniform1f(fogDensityLoc, fogDensity);
+		glCheckError();
+	}
+	
+	if (pressedKeys[GLFW_KEY_MINUS]) {
+		fogDensity = 0.04f;
+		//fogDensity = 0.03f;
+		//std::cout << fogDensity;
+		glUniform1f(fogDensityLoc, fogDensity);
+		glCheckError();
+	}
+
+	if (pressedKeys[GLFW_KEY_EQUAL]) {
+		fogDensity = 0.08f;
+		glUniform1f(fogDensityLoc, fogDensity);
+		glCheckError();
 	}
 }
 
@@ -386,12 +431,18 @@ void initUniforms() {
 	projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");
 	// send projection matrix to shader
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+	glCheckError();
 
 	//set the light direction (direction towards the light)
 	lightDir = glm::vec3(0.0f, 1.0f, 1.0f);
 	lightDirLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightDir");
+	
+	glCheckError();
 	// send light dir to shader
 	glUniform3fv(lightDirLoc, 1, glm::value_ptr(lightDir));
+
+	fogDensityLoc = glGetUniformLocation(myBasicShader.shaderProgram, "fogDensity");
+	glUniform1f(fogDensityLoc, fogDensity);
 
 	//set light color
 	lightColor = glm::vec3(1.0f, 1.0f, 1.0f); //white light
