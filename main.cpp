@@ -154,34 +154,6 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 }
 
 void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
-	//TODO
-   /* if (mouse) {
-		lastX = xpos;
-		lastY = ypos;
-		mouse = false;
-	}
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos;
-	lastX = xpos;
-	lastY = ypos;
-
-	float sensitivity = 0.1f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	yaw += xoffset;
-	pitch += yoffset;
-
-	if (pitch > 89.0f) {
-		pitch = 89.0f;
-	}
-
-	if (pitch < -89.0f) {
-		pitch = -89.0f;
-	}*/
-
-
 	float deltaX = xpos - lastX;
 	float deltaY = ypos - lastY;
 
@@ -194,7 +166,6 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	lastX = xpos;
 	lastY = ypos;
-
 }
 
 void processMovement() {
