@@ -18,6 +18,9 @@
 // window
 gps::Window myWindow;
 
+
+// X' = X; Y' = Z; Z' = -Y
+
 //initial screen dimensions
 //int screenWidth = 1024;
 //int screenHeight = 768;
@@ -43,6 +46,11 @@ glm::vec3 lightDir;
 glm::mat4 lightRotation;
 glm::vec3 lightColor;
 GLuint lightColorLoc;
+
+glm::vec3 pointLightPos1;
+GLuint pointLightPos1Loc;
+GLuint activatePointLight;
+GLuint activatePointLightLoc;
 
 // shader uniform locations
 GLint modelLoc;
@@ -281,9 +289,9 @@ void processMovement() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
-	/*if (pressedKeys[GLFW_KEY_4]) {
+	if (pressedKeys[GLFW_KEY_4]) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POLYGON_MODE);
-	}*/
+	}
 
 	if (pressedKeys[GLFW_KEY_J]) {
 		myBasicShader.useShaderProgram();
@@ -313,8 +321,6 @@ void processMovement() {
 
 	if (pressedKeys[GLFW_KEY_MINUS]) {
 		fogDensity = 0.04f;
-		//fogDensity = 0.03f;
-		//std::cout << fogDensity;
 		glUniform1f(fogDensityLoc, fogDensity);
 		glCheckError();
 	}
@@ -323,6 +329,16 @@ void processMovement() {
 		fogDensity = 0.08f;
 		glUniform1f(fogDensityLoc, fogDensity);
 		glCheckError();
+	}
+
+	if (pressedKeys[GLFW_KEY_Z]) {
+		activatePointLight = 0;
+		glUniform1i(activatePointLightLoc, activatePointLight);
+	}
+
+	if (pressedKeys[GLFW_KEY_X]) {
+		activatePointLight = 1;
+		glUniform1i(activatePointLightLoc, activatePointLight);
 	}
 }
 
@@ -412,8 +428,16 @@ void initUniforms() {
 	// send light dir to shader
 	glUniform3fv(lightDirLoc, 1, glm::value_ptr(lightDir));
 
-	fogDensityLoc = glGetUniformLocation(myBasicShader.shaderProgram, "fogDensity");
-	glUniform1f(fogDensityLoc, fogDensity);
+	/*fogDensityLoc = glGetUniformLocation(myBasicShader.shaderProgram, "fogDensity");
+	glUniform1f(fogDensityLoc, fogDensity);*/
+
+	pointLightPos1 = glm::vec3(2.0743f, 4.7439f, 13.469f);
+	pointLightPos1Loc = glGetUniformLocation(myBasicShader.shaderProgram, "lightPos1");
+	glUniform3fv(pointLightPos1Loc, 1, glm::value_ptr(pointLightPos1));
+
+	activatePointLight = 0;
+	activatePointLightLoc = glGetUniformLocation(myBasicShader.shaderProgram, "havePointLight");
+	glUniform1i(activatePointLightLoc, activatePointLight);
 
 	//set light color
 	lightColor = glm::vec3(1.0f, 1.0f, 1.0f); //white light
@@ -516,6 +540,32 @@ glm::mat4 computeLightSpaceTrMatrix() {
 	return lightSpaceMatrix;
 }
 
+void drawLights(gps::Shader shader) {
+
+	//draw a white cube around the light
+	shader.useShaderProgram();
+
+	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+	//model = lightRotation;
+	//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
+	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+	lightCube.Draw(shader);
+
+	//draw a white cube around the point lights
+	if (activatePointLight == 1) {
+		shader.useShaderProgram();
+		glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+		/*model = glm::rotate(glm::mat4(1.0f), glm::radians(angleY), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, 1.0f * pointLightPos1);
+		model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));*/
+		glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+		lightCube.Draw(shader);
+	}
+}
 
 void renderScene() {
 	// render the scene to the depth buffer
@@ -574,6 +624,17 @@ void renderScene() {
 		lightDirLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightDir");
 		glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::inverseTranspose(glm::mat3(view * lightRotation)) * lightDir));
 
+		fogDensityLoc = glGetUniformLocation(myBasicShader.shaderProgram, "fogDensity");
+		glUniform1f(fogDensityLoc, fogDensity);
+
+		/*pointLightPos1 = glm::vec3(2.0743f, 4.7439f, 13.469f);
+		pointLightPos1Loc = glGetUniformLocation(myBasicShader.shaderProgram, "lightPos1");
+		glUniform3fv(pointLightPos1Loc, 1, glm::value_ptr(pointLightPos1));
+
+		activatePointLight = 0;
+		activatePointLightLoc = glGetUniformLocation(myBasicShader.shaderProgram, "havePointLight");
+		glUniform1i(activatePointLightLoc, activatePointLight);*/
+
 		glCheckError();
 		//bind the shadow map
 		glActiveTexture(GL_TEXTURE3);
@@ -598,15 +659,13 @@ void renderScene() {
 		glUniformMatrix4fv(glGetUniformLocation(lightShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
 		lightCube.Draw(lightShader);
-
+		drawLights(lightShader);
 		skyboxShader.useShaderProgram();
 		mySkyBox.Draw(skyboxShader, view, projection);
-
-
-		// render the teapot
-		//renderTeapot(myBasicShader);	   
 	}
 }
+
+
 
 void cleanup() {
 	myWindow.Delete();
