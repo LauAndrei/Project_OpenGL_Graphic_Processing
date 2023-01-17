@@ -270,11 +270,11 @@ void processMovement() {
 	}
 
 	if (pressedKeys[GLFW_KEY_1]) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 	}
 
 	if (pressedKeys[GLFW_KEY_2]) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
 
 	if (pressedKeys[GLFW_KEY_3]) {
@@ -310,7 +310,7 @@ void processMovement() {
 		glUniform1f(fogDensityLoc, fogDensity);
 		glCheckError();
 	}
-	
+
 	if (pressedKeys[GLFW_KEY_MINUS]) {
 		fogDensity = 0.04f;
 		//fogDensity = 0.03f;
@@ -407,7 +407,7 @@ void initUniforms() {
 	//set the light direction (direction towards the light)
 	lightDir = glm::vec3(0.0f, 1.0f, 1.0f);
 	lightDirLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightDir");
-	
+
 	glCheckError();
 	// send light dir to shader
 	glUniform3fv(lightDirLoc, 1, glm::value_ptr(lightDir));
@@ -513,7 +513,7 @@ glm::mat4 computeLightSpaceTrMatrix() {
 	// can be used to transform the vertices of the objects in the scene so that they are projected onto the screen in the correct positions.
 	glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
 	glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-	return lightSpaceMatrix;															    
+	return lightSpaceMatrix;
 }
 
 
@@ -539,52 +539,73 @@ void renderScene() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glCheckError();
 
-	// final scene rendering pass (with shadows)
-	glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
-	glCheckError();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glCheckError();
-	myBasicShader.useShaderProgram();
-	view = myCamera.getViewMatrix();
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-	glCheckError();
+	if (showDepthMap) {
+		glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
 
-	lightDir = glm::vec3(10.0f, 20.0f, 10.0f);
-	lightRotation = glm::rotate(glm::mat4(1.0f), glm::radians(lightAngle), glm::vec3(0.0f, 1.0f, 0.0f));
-	lightDirLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightDir");
-	glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::inverseTranspose(glm::mat3(view * lightRotation)) * lightDir));
+		glClear(GL_COLOR_BUFFER_BIT);
 
-	glCheckError();
-	//bind the shadow map
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, depthMapTexture);
-	glUniform1i(glGetUniformLocation(myBasicShader.shaderProgram, "shadowMap"), 3);
+		screenQuadShader.useShaderProgram();
 
-	glUniformMatrix4fv(glGetUniformLocation(myBasicShader.shaderProgram, "lightSpaceTrMatrix"),
-		1,
-		GL_FALSE,
-		glm::value_ptr(computeLightSpaceTrMatrix()));
+		//bind the depth map
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, depthMapTexture);
+		glUniform1i(glGetUniformLocation(screenQuadShader.shaderProgram, "depthMap"), 0);
 
-	drawObjects(myBasicShader, false);
+		glDisable(GL_DEPTH_TEST);
+		screenQuad.Draw(screenQuadShader);
+		glEnable(GL_DEPTH_TEST);
 
-	//draw a white cube around the light
-	lightShader.useShaderProgram();
+	}
+	else {
 
-	glUniformMatrix4fv(glGetUniformLocation(lightShader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		// final scene rendering pass (with shadows)
+		glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+		glCheckError();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glCheckError();
+		myBasicShader.useShaderProgram();
+		view = myCamera.getViewMatrix();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		glCheckError();
 
-	model = lightRotation;
-	model = glm::translate(model, 1.0f * lightDir);
-	model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
-	glUniformMatrix4fv(glGetUniformLocation(lightShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		// position of directional light (sun in our case)
+		lightDir = glm::vec3(10.0f, 20.0f, 10.0f);
+		lightRotation = glm::rotate(glm::mat4(1.0f), glm::radians(lightAngle), glm::vec3(0.0f, 1.0f, 0.0f));
+		lightDirLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightDir");
+		glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::inverseTranspose(glm::mat3(view * lightRotation)) * lightDir));
 
-	lightCube.Draw(lightShader);
+		glCheckError();
+		//bind the shadow map
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, depthMapTexture);
+		glUniform1i(glGetUniformLocation(myBasicShader.shaderProgram, "shadowMap"), 3);
 
-	skyboxShader.useShaderProgram();
-	mySkyBox.Draw(skyboxShader, view, projection);
+		glUniformMatrix4fv(glGetUniformLocation(myBasicShader.shaderProgram, "lightSpaceTrMatrix"),
+			1,
+			GL_FALSE,
+			glm::value_ptr(computeLightSpaceTrMatrix()));
+
+		drawObjects(myBasicShader, false);
+
+		//draw a white cube around the light
+		lightShader.useShaderProgram();
+
+		glUniformMatrix4fv(glGetUniformLocation(lightShader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+		model = lightRotation;
+		model = glm::translate(model, 1.0f * lightDir);
+		model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
+		glUniformMatrix4fv(glGetUniformLocation(lightShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+		lightCube.Draw(lightShader);
+
+		skyboxShader.useShaderProgram();
+		mySkyBox.Draw(skyboxShader, view, projection);
 
 
-	// render the teapot
-	//renderTeapot(myBasicShader);
+		// render the teapot
+		//renderTeapot(myBasicShader);	   
+	}
 }
 
 void cleanup() {

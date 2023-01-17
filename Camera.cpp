@@ -54,8 +54,10 @@ namespace gps {
 			cameraTarget += cameraUpDirection * speed;
 			break;
 		case MOVE_DOWN:
-			cameraPosition -= cameraUpDirection * speed;
-			cameraTarget -= cameraUpDirection * speed;
+			if ((cameraPosition - cameraFrontDirection * speed).y > 4) {
+				cameraPosition -= cameraUpDirection * speed;
+				cameraTarget -= cameraUpDirection * speed;
+			}
 			break;
 
 		case TURN_LEFT:
