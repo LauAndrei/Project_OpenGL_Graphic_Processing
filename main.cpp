@@ -49,6 +49,10 @@ GLuint lightColorLoc;
 
 glm::vec3 pointLightPos1;
 GLuint pointLightPos1Loc;
+
+glm::vec3 pointLightPos2;
+GLuint pointLightPos2Loc;
+
 GLuint activatePointLight;
 GLuint activatePointLightLoc;
 
@@ -336,8 +340,13 @@ void processMovement() {
 		glUniform1i(activatePointLightLoc, activatePointLight);
 	}
 
-	if (pressedKeys[GLFW_KEY_X]) {
+	if (pressedKeys[GLFW_KEY_C]) {
 		activatePointLight = 1;
+		glUniform1i(activatePointLightLoc, activatePointLight);
+	}
+
+	if (pressedKeys[GLFW_KEY_X]) {
+		activatePointLight = 2;
 		glUniform1i(activatePointLightLoc, activatePointLight);
 	}
 }
@@ -434,6 +443,10 @@ void initUniforms() {
 	pointLightPos1 = glm::vec3(2.0743f, 4.7439f, 13.469f);
 	pointLightPos1Loc = glGetUniformLocation(myBasicShader.shaderProgram, "lightPos1");
 	glUniform3fv(pointLightPos1Loc, 1, glm::value_ptr(pointLightPos1));
+
+	pointLightPos2 = glm::vec3(3.8219f, 4.7439f, 12.085f);
+	pointLightPos2Loc = glGetUniformLocation(myBasicShader.shaderProgram, "lightPos2");
+	glUniform3fv(pointLightPos2Loc, 1, glm::value_ptr(pointLightPos2));
 
 	activatePointLight = 0;
 	activatePointLightLoc = glGetUniformLocation(myBasicShader.shaderProgram, "havePointLight");
@@ -547,8 +560,6 @@ void drawLights(gps::Shader shader) {
 
 	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
-	//model = lightRotation;
-	//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
 	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
 	lightCube.Draw(shader);
@@ -558,9 +569,21 @@ void drawLights(gps::Shader shader) {
 		shader.useShaderProgram();
 		glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
-		/*model = glm::rotate(glm::mat4(1.0f), glm::radians(angleY), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::translate(model, 1.0f * pointLightPos1);
-		model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));*/
+		model = glm::translate(model, glm::vec3(1.0f, 10.0f, 1.0f));
+
+		glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+		lightCube.Draw(shader);
+	}
+
+	if (activatePointLight == 2) {
+		shader.useShaderProgram();
+		glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+		model = glm::translate(model, 1.0f * pointLightPos2);
+		model = glm::translate(model, glm::vec3(1.0f, 10.0f, 1.0f));
+
 		glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
 		lightCube.Draw(shader);
