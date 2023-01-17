@@ -28,8 +28,8 @@ int glWindowHeight = 1080;
 int retina_width, retina_height;
 GLFWwindow* glWindow = NULL;
 
-const unsigned int SHADOW_WIDTH = 2048;
-const unsigned int SHADOW_HEIGHT = 2048;
+const unsigned int SHADOW_WIDTH = 10000;
+const unsigned int SHADOW_HEIGHT = 10000;
 
 // matrices
 glm::mat4 model;
@@ -509,9 +509,11 @@ glm::mat4 computeLightSpaceTrMatrix() {
 	glm::mat4 lightView = glm::lookAt(glm::mat3(lightRotation) * lightDir, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	const GLfloat near_plane = 0.1f, far_plane = 50.0f;
+	// we create an orthographic projection matrix - left right top bot near far
+	// can be used to transform the vertices of the objects in the scene so that they are projected onto the screen in the correct positions.
 	glm::mat4 lightProjection = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, near_plane, far_plane);
 	glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-	return lightSpaceMatrix;
+	return lightSpaceMatrix;															    
 }
 
 
