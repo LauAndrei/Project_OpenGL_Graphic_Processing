@@ -318,34 +318,75 @@ void processMovement() {
 	}
 
 	if (pressedKeys[GLFW_KEY_0]) {
+		myCamera.move(gps::TURN_RIGHT, cameraSpeed);
+		//update view matrix
+		view = myCamera.getViewMatrix();
+		myBasicShader.useShaderProgram();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 		fogDensity = 0.0f;
 		glUniform1f(fogDensityLoc, fogDensity);
 		glCheckError();
 	}
 
 	if (pressedKeys[GLFW_KEY_MINUS]) {
+		myCamera.move(gps::TURN_RIGHT, cameraSpeed);
+		//update view matrix
+		view = myCamera.getViewMatrix();
+		myBasicShader.useShaderProgram();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		// compute normal matrix for teapot
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 		fogDensity = 0.04f;
 		glUniform1f(fogDensityLoc, fogDensity);
 		glCheckError();
 	}
 
 	if (pressedKeys[GLFW_KEY_EQUAL]) {
+		myCamera.move(gps::TURN_RIGHT, cameraSpeed);
+		//update view matrix
+		view = myCamera.getViewMatrix();
+		myBasicShader.useShaderProgram();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		// compute normal matrix for teapot
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 		fogDensity = 0.08f;
 		glUniform1f(fogDensityLoc, fogDensity);
 		glCheckError();
 	}
 
 	if (pressedKeys[GLFW_KEY_Z]) {
+		myCamera.move(gps::TURN_RIGHT, cameraSpeed);
+		//update view matrix
+		view = myCamera.getViewMatrix();
+		myBasicShader.useShaderProgram();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		// compute normal matrix for teapot
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 		activatePointLight = 0;
 		glUniform1i(activatePointLightLoc, activatePointLight);
 	}
 
 	if (pressedKeys[GLFW_KEY_C]) {
+		myCamera.move(gps::TURN_RIGHT, cameraSpeed);
+		//update view matrix
+		view = myCamera.getViewMatrix();
+		myBasicShader.useShaderProgram();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		// compute normal matrix for teapot
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 		activatePointLight = 1;
 		glUniform1i(activatePointLightLoc, activatePointLight);
 	}
 
 	if (pressedKeys[GLFW_KEY_X]) {
+		myCamera.move(gps::TURN_RIGHT, cameraSpeed);
+		//update view matrix
+		view = myCamera.getViewMatrix();
+		myBasicShader.useShaderProgram();
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		// compute normal matrix for teapot
+		normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
 		activatePointLight = 2;
 		glUniform1i(activatePointLightLoc, activatePointLight);
 	}
